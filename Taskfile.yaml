@@ -1,0 +1,42 @@
+---
+version: "3"
+
+vars:
+  PROJECT: machinery-status-collector
+  MODULE: github.com/stuttgart-things/machinery-status-collector
+  BIN_DIR: ./bin
+
+includes:
+  git:
+    taskfile: https://raw.githubusercontent.com/stuttgart-things/tasks/refs/heads/main/git/git.yaml
+  lint:
+    taskfile: https://raw.githubusercontent.com/stuttgart-things/tasks/refs/heads/main/git/linting.yaml
+  go:
+
+  release:dry-run:
+    desc: Semantic-release Dry-Run (requires Node.js)
+    cmds:
+      - |
+        if ! command -v npx >/dev/null 2>&1; then
+          echo "Node.js (npx) nicht gefunden. Bitte Node installieren." && exit 1
+        fi
+        npx semantic-release --dry-run
+
+  release:trigger:
+    desc: Trigger GitHub Release Workflow (push empty commit)
+    cmds:
+      - |
+        git commit --allow-empty -m "chore(release): trigger pipeline"
+        git push origin $(git rev-parse --abbrev-ref HEAD)
+    taskfile: https://raw.githubusercontent.com/stuttgart-things/tasks/refs/heads/main/go/lint.yaml
+
+tasks:
+  do:
+    desc: Select a task to run
+    cmds:
+      - |
+        # Extract task names (keep internal colons, remove only trailing colon)
+        task_name=$(task -l | awk '/^\*/ {print $2}' | sed 's/:$//' | gum choose)
+
+        # Run the selected task
+        [ -n "$task_name" ] && task "$task_name"

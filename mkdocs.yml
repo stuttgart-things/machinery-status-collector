@@ -1,0 +1,8 @@
+site_name: machinery-status-collector
+site_description: Monitor deployed claims and report health status
+
+nav:
+  - Home: index.md
+
+plugins:
+  - techdocs-core
