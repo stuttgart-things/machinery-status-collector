@@ -1,4 +1,3 @@
----
 version: "3"
 
 vars:
@@ -11,7 +10,10 @@ includes:
     taskfile: https://raw.githubusercontent.com/stuttgart-things/tasks/refs/heads/main/git/git.yaml
   lint:
     taskfile: https://raw.githubusercontent.com/stuttgart-things/tasks/refs/heads/main/git/linting.yaml
-  go:
+  golang:
+    taskfile: https://raw.githubusercontent.com/stuttgart-things/tasks/refs/heads/main/go/lint.yaml
+
+tasks:
 
   release:dry-run:
     desc: Semantic-release Dry-Run (requires Node.js)
@@ -27,16 +29,12 @@ includes:
     cmds:
       - |
         git commit --allow-empty -m "chore(release): trigger pipeline"
+      - |
         git push origin $(git rev-parse --abbrev-ref HEAD)
-    taskfile: https://raw.githubusercontent.com/stuttgart-things/tasks/refs/heads/main/go/lint.yaml
 
-tasks:
   do:
     desc: Select a task to run
     cmds:
       - |
-        # Extract task names (keep internal colons, remove only trailing colon)
         task_name=$(task -l | awk '/^\*/ {print $2}' | sed 's/:$//' | gum choose)
-
-        # Run the selected task
         [ -n "$task_name" ] && task "$task_name"
