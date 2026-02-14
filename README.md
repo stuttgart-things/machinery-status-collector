@@ -25,6 +25,44 @@ go run .
 task run
 ```
 
+## API Usage
+
+The collector exposes an HTTP API for receiving and querying status updates.
+
+### Submit a status update
+
+```bash
+curl -X POST http://localhost:8080/api/v1/status \
+  -H "Content-Type: application/json" \
+  -d '{"cluster":"cluster-a","claimRef":"network/vpc-prod","statusMessage":"ready"}'
+```
+
+### Get all status entries
+
+```bash
+curl http://localhost:8080/api/v1/status
+```
+
+### Get status entries for a specific cluster
+
+```bash
+curl http://localhost:8080/api/v1/status/cluster-a
+```
+
+### Health check
+
+```bash
+curl http://localhost:8080/healthz
+# {"status":"ok"}
+```
+
+### Version info
+
+```bash
+curl http://localhost:8080/version
+# {"version":"dev","commit":"none"}
+```
+
 ## Releases
 
 Automated releases via GitHub Actions with [semantic-release](https://github.com/semantic-release/semantic-release).
