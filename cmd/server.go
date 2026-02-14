@@ -52,7 +52,7 @@ func runServer(cmd *cobra.Command, args []string) error {
 	// Optional environment variables with defaults.
 	port := os.Getenv("COLLECTOR_PORT")
 	if port == "" {
-		port = "8080"
+		port = "8095"
 	}
 
 	intervalStr := os.Getenv("COLLECTOR_RECONCILE_INTERVAL")
