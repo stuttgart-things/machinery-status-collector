@@ -172,6 +172,33 @@ func (c *GitHubClient) ListOpenPRs(head string) ([]int, error) {
 	return numbers, nil
 }
 
+// GetRef returns the commit SHA that the given branch points to.
+func (c *GitHubClient) GetRef(branch string) (string, error) {
+	apiPath := fmt.Sprintf("/repos/%s/%s/git/ref/heads/%s",
+		url.PathEscape(c.owner), url.PathEscape(c.repo), branch)
+
+	resp, err := c.doRequest(http.MethodGet, apiPath, nil)
+	if err != nil {
+		return "", fmt.Errorf("get ref: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("get ref: unexpected status %d", resp.StatusCode)
+	}
+
+	var result struct {
+		Object struct {
+			SHA string `json:"sha"`
+		} `json:"object"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return "", fmt.Errorf("get ref: decode response: %w", err)
+	}
+
+	return result.Object.SHA, nil
+}
+
 func (c *GitHubClient) doRequest(method, path string, body any) (*http.Response, error) {
 	var bodyReader io.Reader
 	if body != nil {
