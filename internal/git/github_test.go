@@ -230,6 +230,49 @@ func TestListOpenPRs_Empty(t *testing.T) {
 	}
 }
 
+func TestGetRef(t *testing.T) {
+	wantSHA := "commitsha123456"
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			t.Fatalf("expected GET, got %s", r.Method)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]any{
+			"ref": "refs/heads/main",
+			"object": map[string]string{
+				"sha":  wantSHA,
+				"type": "commit",
+			},
+		})
+	}))
+	defer srv.Close()
+
+	client := newTestClient(srv.URL, "test-token")
+	sha, err := client.GetRef("main")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if sha != wantSHA {
+		t.Fatalf("expected sha %q, got %q", wantSHA, sha)
+	}
+}
+
+func TestGetRef_NotFound(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(map[string]string{"message": "Not Found"})
+	}))
+	defer srv.Close()
+
+	client := newTestClient(srv.URL, "test-token")
+	_, err := client.GetRef("nonexistent")
+	if err == nil {
+		t.Fatal("expected error for 404 response")
+	}
+}
+
 func TestAuthHeader(t *testing.T) {
 	wantToken := "my-secret-token"
 
