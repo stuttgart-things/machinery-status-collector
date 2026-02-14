@@ -20,10 +20,41 @@ cd machinery-status-collector
 go mod tidy
 
 # Run the application
-go run .
-# or with Task
-task run
+go run . server
 ```
+
+## Server
+
+Start the HTTP server and reconciler:
+
+```bash
+go run . server
+```
+
+### Environment Variables
+
+| Variable | Required | Default | Description |
+|---|---|---|---|
+| `GITHUB_TOKEN` | yes | — | GitHub API token |
+| `REGISTRY_REPO_OWNER` | yes | — | GitHub org/user |
+| `REGISTRY_REPO_NAME` | yes | — | GitHub repo name |
+| `REGISTRY_FILE_PATH` | yes | — | Path to registry YAML in repo |
+| `COLLECTOR_PORT` | no | `8095` | HTTP listen port |
+| `COLLECTOR_RECONCILE_INTERVAL` | no | `5m` | Reconcile ticker interval |
+| `REGISTRY_BASE_BRANCH` | no | `main` | Base branch for PRs |
+
+### Example
+
+```bash
+export GITHUB_TOKEN=ghp_...
+export REGISTRY_REPO_OWNER=stuttgart-things
+export REGISTRY_REPO_NAME=my-registry
+export REGISTRY_FILE_PATH=clusters/registry.yaml
+
+go run . server
+```
+
+The server listens on `:8095` by default. The reconciler runs in the background, periodically batching collected status updates into pull requests. Graceful shutdown is triggered by `SIGINT` or `SIGTERM`.
 
 ## API Usage
 
@@ -32,7 +63,7 @@ The collector exposes an HTTP API for receiving and querying status updates.
 ### Submit a status update
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/status \
+curl -X POST http://localhost:8095/api/v1/status \
   -H "Content-Type: application/json" \
   -d '{"cluster":"cluster-a","claimRef":"network/vpc-prod","statusMessage":"ready"}'
 ```
@@ -40,26 +71,26 @@ curl -X POST http://localhost:8080/api/v1/status \
 ### Get all status entries
 
 ```bash
-curl http://localhost:8080/api/v1/status
+curl http://localhost:8095/api/v1/status
 ```
 
 ### Get status entries for a specific cluster
 
 ```bash
-curl http://localhost:8080/api/v1/status/cluster-a
+curl http://localhost:8095/api/v1/status/cluster-a
 ```
 
 ### Health check
 
 ```bash
-curl http://localhost:8080/healthz
+curl http://localhost:8095/healthz
 # {"status":"ok"}
 ```
 
 ### Version info
 
 ```bash
-curl http://localhost:8080/version
+curl http://localhost:8095/version
 # {"version":"dev","commit":"none"}
 ```
 
