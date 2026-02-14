@@ -52,3 +52,6 @@ debug.test
 
 # Air live reload tmp directory
 tmp/
+
+# Task runner cache
+.task/
