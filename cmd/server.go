@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -32,22 +33,26 @@ func init() {
 
 func runServer(cmd *cobra.Command, args []string) error {
 	// Required environment variables.
+	required := []string{
+		"GITHUB_TOKEN",
+		"REGISTRY_REPO_OWNER",
+		"REGISTRY_REPO_NAME",
+		"REGISTRY_FILE_PATH",
+	}
+	var missing []string
+	for _, key := range required {
+		if os.Getenv(key) == "" {
+			missing = append(missing, key)
+		}
+	}
+	if len(missing) > 0 {
+		return fmt.Errorf("missing required environment variables:\n  %s", strings.Join(missing, "\n  "))
+	}
+
 	token := os.Getenv("GITHUB_TOKEN")
-	if token == "" {
-		return fmt.Errorf("GITHUB_TOKEN is required")
-	}
 	owner := os.Getenv("REGISTRY_REPO_OWNER")
-	if owner == "" {
-		return fmt.Errorf("REGISTRY_REPO_OWNER is required")
-	}
 	repo := os.Getenv("REGISTRY_REPO_NAME")
-	if repo == "" {
-		return fmt.Errorf("REGISTRY_REPO_NAME is required")
-	}
 	filePath := os.Getenv("REGISTRY_FILE_PATH")
-	if filePath == "" {
-		return fmt.Errorf("REGISTRY_FILE_PATH is required")
-	}
 
 	// Optional environment variables with defaults.
 	port := os.Getenv("COLLECTOR_PORT")
