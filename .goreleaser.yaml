@@ -1,0 +1,29 @@
+---
+project_name: machinery-status-collector
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X github.com/stuttgart-things/machinery-status-collector/cmd.Version={{.Version}}
+      - -X github.com/stuttgart-things/machinery-status-collector/cmd.Date={{.Date}}
+      - -X github.com/stuttgart-things/machinery-status-collector/cmd.Commit={{.Commit}}
+
+archives:
+  - format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"

@@ -9,3 +9,6 @@ builds:
       - -trimpath
     ldflags:
       - -s -w
+      - -X github.com/stuttgart-things/machinery-status-collector/cmd.Version={{.Env.VERSION}}
+      - -X github.com/stuttgart-things/machinery-status-collector/cmd.Commit={{.Env.COMMIT}}
+      - -X github.com/stuttgart-things/machinery-status-collector/cmd.Date={{.Env.DATE}}

@@ -4,6 +4,16 @@ vars:
   PROJECT: machinery-status-collector
   MODULE: github.com/stuttgart-things/machinery-status-collector
   BIN_DIR: ./bin
+  VERSION:
+    sh: git describe --tags --always --dirty 2>/dev/null || echo "dev"
+  COMMIT:
+    sh: git rev-parse --short HEAD 2>/dev/null || echo "none"
+  DATE:
+    sh: date -u +"%Y-%m-%dT%H:%M:%SZ"
+  LDFLAGS: >-
+    -X {{.MODULE}}/cmd.Version={{.VERSION}}
+    -X {{.MODULE}}/cmd.Commit={{.COMMIT}}
+    -X {{.MODULE}}/cmd.Date={{.DATE}}
 
 includes:
   git:
@@ -14,6 +24,39 @@ includes:
     taskfile: https://raw.githubusercontent.com/stuttgart-things/tasks/refs/heads/main/go/lint.yaml
 
 tasks:
+
+  build:
+    desc: Build the binary with version info
+    cmds:
+      - go build -ldflags '{{.LDFLAGS}}' -o {{.BIN_DIR}}/{{.PROJECT}} .
+
+  test:
+    desc: Run all tests with race detection and coverage
+    cmds:
+      - go test -race -cover ./...
+
+  lint:
+    desc: Run golangci-lint
+    cmds:
+      - golangci-lint run
+
+  run-server:
+    desc: Build and run the server subcommand
+    deps: [build]
+    cmds:
+      - "{{.BIN_DIR}}/{{.PROJECT}} server"
+
+  run-informer:
+    desc: Build and run the informer subcommand
+    deps: [build]
+    cmds:
+      - "{{.BIN_DIR}}/{{.PROJECT}} informer"
+
+  tag:
+    desc: Create and push a git tag
+    cmds:
+      - git tag -a {{.CLI_ARGS}} -m "Release {{.CLI_ARGS}}"
+      - git push origin {{.CLI_ARGS}}
 
   release:dry-run:
     desc: Semantic-release Dry-Run (requires Node.js)
