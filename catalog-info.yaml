@@ -3,14 +3,18 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: machinery-status-collector
-  description: Monitor deployed claims and report health status
+  description: Collects Crossplane claim status from multiple Kubernetes clusters and reconciles updates into pull requests
   annotations:
     github.com/project-slug: stuttgart-things/machinery-status-collector
     backstage.io/techdocs-ref: dir:.
   tags:
     - golang
     - service
+  links:
+    - url: https://github.com/stuttgart-things/machinery-status-collector
+      title: Repository
+      icon: github
 spec:
   type: service
   lifecycle: experimental
-  owner: group:default/platform-team
+  owner: sthings-team
