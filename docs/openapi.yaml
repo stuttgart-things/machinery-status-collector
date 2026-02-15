@@ -1,0 +1,164 @@
+openapi: 3.0.3
+info:
+  title: Machinery Status Collector API
+  description: >
+    Collects Crossplane claim status from multiple Kubernetes clusters and
+    batches updates into pull requests against the central registry repository.
+  version: 0.1.0
+  license:
+    name: Apache-2.0
+
+servers:
+  - url: http://localhost:8095
+    description: Local development
+
+paths:
+  /api/v1/status:
+    post:
+      summary: Submit a status update
+      description: >
+        Receives a status update from a cluster agent and stores it in memory.
+        The reconciler will later batch these into a pull request.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StatusRequest"
+      responses:
+        "201":
+          description: Status update accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreatedResponse"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    get:
+      summary: List all status entries
+      description: Returns all status entries currently held in memory.
+      responses:
+        "200":
+          description: List of status entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StatusEntry"
+
+  /api/v1/status/{cluster}:
+    get:
+      summary: List status entries for a cluster
+      description: Returns status entries filtered by cluster name.
+      parameters:
+        - name: cluster
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Name of the cluster to filter by
+      responses:
+        "200":
+          description: Filtered list of status entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StatusEntry"
+
+  /healthz:
+    get:
+      summary: Health check
+      description: Returns the health status of the service.
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+
+  /version:
+    get:
+      summary: Version information
+      description: Returns the build version and commit SHA.
+      responses:
+        "200":
+          description: Version details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VersionResponse"
+
+components:
+  schemas:
+    StatusRequest:
+      type: object
+      required:
+        - cluster
+        - claimRef
+        - statusMessage
+      properties:
+        cluster:
+          type: string
+          example: cluster-01
+        claimRef:
+          type: string
+          example: default/my-db
+        statusMessage:
+          type: string
+          example: Resource is available
+
+    StatusEntry:
+      type: object
+      properties:
+        cluster:
+          type: string
+          example: cluster-01
+        claimRef:
+          type: string
+          example: default/my-db
+        statusMessage:
+          type: string
+          example: Resource is available
+        receivedAt:
+          type: string
+          format: date-time
+          example: "2026-02-15T10:30:00Z"
+
+    CreatedResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: created
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+
+    VersionResponse:
+      type: object
+      properties:
+        version:
+          type: string
+          example: v0.1.0
+        commit:
+          type: string
+          example: abc1234
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "cluster, claimRef, and statusMessage are required"

@@ -1,8 +1,26 @@
-site_name: machinery-status-collector
-site_description: Monitor deployed claims and report health status
+site_name: Machinery Status Collector
+site_description: Collects Crossplane claim status from multiple Kubernetes clusters
+repo_url: https://github.com/stuttgart-things/machinery-status-collector
+edit_uri: edit/main/docs/
 
 nav:
   - Home: index.md
+  - API Reference: openapi.yaml
 
 plugins:
   - techdocs-core
+
+theme:
+  name: material
+  palette:
+    scheme: default
+    primary: indigo
+    accent: indigo
+  features:
+    - content.code.copy
+    - navigation.instant
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - tables
