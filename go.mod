@@ -3,7 +3,7 @@ module github.com/stuttgart-things/machinery-status-collector
 go 1.25.6
 
 require (
-	github.com/charmbracelet/lipgloss v1.1.0
+	github.com/charmbracelet/lipgloss/v2 v2.0.2
 	github.com/lucasb-eyer/go-colorful v1.3.0
 	github.com/spf13/cobra v1.10.2
 	gopkg.in/yaml.v3 v3.0.1
