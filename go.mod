@@ -4,7 +4,7 @@ go 1.25.6
 
 require (
 	github.com/charmbracelet/lipgloss v1.1.0
-	github.com/lucasb-eyer/go-colorful v1.3.0
+	github.com/lucasb-eyer/go-colorful v1.4.0
 	github.com/spf13/cobra v1.10.2
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/apimachinery v0.35.1
